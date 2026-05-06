@@ -116,7 +116,8 @@ CREATE TABLE payments (
     amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
     payment_date DATE NOT NULL,
 
-    payment_method VARCHAR(50) NOT NULL,
+    payment_method VARCHAR(50) NOT NULL 
+        CHECK (payment_method IN ('GCASH', 'DEBIT CARD', 'MAYA', 'CASH')), 
     status VARCHAR(20) DEFAULT 'Unpaid'
         CHECK (status IN ('Unpaid', 'Paid', 'Refunded')),
 
