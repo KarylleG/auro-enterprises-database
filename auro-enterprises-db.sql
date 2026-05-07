@@ -386,60 +386,8 @@ $$ LANGUAGE plpgsql;
 
 SELECT total_revenue();
 
--- VIEW PAID PAYMENTS -- DID NOT INCLUDE
-CREATE VIEW paid_payments_view AS
-SELECT
-    p.payment_code,
-    b.booking_code,
-    p.amount,
-    p.payment_method,
-    p.payment_date
-FROM payments p
-JOIN bookings b
-    ON p.booking_id = b.booking_id
-WHERE p.status = 'Paid';
 
--- VIEW UNPAID PAYMENTS -- DID NOT INCLUDE
-CREATE VIEW unpaid_payments_view AS
-SELECT
-    p.payment_code,
-    b.booking_code,
-    c.customer_fname || ' ' || c.customer_lname AS customer_name,
-    p.amount,
-    p.payment_date
-FROM payments p
-JOIN bookings b
-    ON p.booking_id = b.booking_id
-JOIN customers c
-    ON b.customer_id = c.customer_id
-WHERE p.status = 'Unpaid';
 
--- VIEW PAYMENT HISTORY-- -- DID NOT INCLUDE
-CREATE VIEW customer_payment_history_view AS
-SELECT
-    c.customer_fname || ' ' || c.customer_lname AS customer_name,
-    b.booking_code,
-    p.payment_code,
-    p.amount,
-    p.payment_method,
-    p.payment_date,
-    p.status
-FROM payments p
-JOIN bookings b
-    ON p.booking_id = b.booking_id
-JOIN customers c
-    ON b.customer_id = c.customer_id;
-
--- CREATE VIEW customer_aircon_units_view AS -- DID NOT INCLUDE
-SELECT
-    c.customer_fname || ' ' || c.customer_lname AS customer_name,
-    au.unit_code,
-    au.brand,
-    au.model,
-    au.unit_type
-FROM aircon_units au
-JOIN customers c
-    ON au.customer_id = c.customer_id;
 
 
 
