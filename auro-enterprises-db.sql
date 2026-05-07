@@ -369,3 +369,144 @@ ON bookings(service_id);
 
 CREATE INDEX idx_bookings_technician_id
 ON bookings(technician_id);
+
+-- TRIGGER PREVENT DOUBLE BOOKING 
+
+CREATE TRIGGER trg_prevent_double_booking
+BEFORE INSERT ON bookings
+FOR EACH ROW
+WHEN (
+    EXISTS (
+        SELECT 1
+        FROM bookings
+        WHERE technician_id = NEW.technician_id
+        AND booking_date = NEW.booking_date
+        AND status <> 'Cancelled'
+    )
+)
+EXECUTE FUNCTION raise_exception();
+ 
+-- FUNCTIONS TECHNICIANS DOUBLE SCHEDULING
+
+CREATE OR REPLACE FUNCTION raise_exception()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Technician already booked on this date';
+END;
+$$ LANGUAGE plpgsql;
+
+-- PROCEDURE ADD BOOKINGS 
+
+CREATE OR REPLACE PROCEDURE add_booking(
+    p_customer_id INT,
+    p_service_id INT,
+    p_technician_id INT,
+    p_booking_date DATE,
+    p_house_number VARCHAR,
+    p_barangay VARCHAR,
+    p_city VARCHAR,
+    p_province VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO bookings (
+        customer_id,
+        service_id,
+        technician_id,
+        booking_date,
+        service_house_number,
+        service_barangay,
+        service_city,
+        service_province
+    )
+    VALUES (
+        p_customer_id,
+        p_service_id,
+        p_technician_id,
+        p_booking_date,
+        p_house_number,
+        p_barangay,
+        p_city,
+        p_province
+    );
+END;
+$$;
+
+-- view service history 
+
+CREATE VIEW service_history_report_view AS
+SELECT
+    sh.history_code,
+    c.customer_fname || ' ' || c.customer_lname AS customer_name,
+    s.service_name,
+    t.technician_fname || ' ' || t.technician_lname AS technician_name,
+    sh.service_date,
+    sh.remarks,
+    sh.created_at
+FROM service_history sh
+JOIN customers c
+    ON sh.customer_id = c.customer_id
+LEFT JOIN services s
+    ON sh.service_id = s.service_id
+LEFT JOIN technicians t
+    ON sh.technician_id = t.technician_id;
+
+-- VIEW PAID PAYMENTS
+CREATE VIEW paid_payments_view AS
+SELECT
+    p.payment_code,
+    b.booking_code,
+    p.amount,
+    p.payment_method,
+    p.payment_date
+FROM payments p
+JOIN bookings b
+    ON p.booking_id = b.booking_id
+WHERE p.status = 'Paid';
+
+-- VIEW UNPAID PAYMENTS
+
+CREATE VIEW unpaid_payments_view AS
+SELECT
+    p.payment_code,
+    b.booking_code,
+    c.customer_fname || ' ' || c.customer_lname AS customer_name,
+    p.amount,
+    p.payment_date
+FROM payments p
+JOIN bookings b
+    ON p.booking_id = b.booking_id
+JOIN customers c
+    ON b.customer_id = c.customer_id
+WHERE p.status = 'Unpaid';
+
+-- VIEW PAYMENT HISTORY
+
+CREATE VIEW customer_payment_history_view AS
+SELECT
+    c.customer_fname || ' ' || c.customer_lname AS customer_name,
+    b.booking_code,
+    p.payment_code,
+    p.amount,
+    p.payment_method,
+    p.payment_date,
+    p.status
+FROM payments p
+JOIN bookings b
+    ON p.booking_id = b.booking_id
+JOIN customers c
+    ON b.customer_id = c.customer_id;
+
+-- CREATE VIEW customer_aircon_units_view AS
+SELECT
+    c.customer_fname || ' ' || c.customer_lname AS customer_name,
+    au.unit_code,
+    au.brand,
+    au.model,
+    au.unit_type
+FROM aircon_units au
+JOIN customers c
+    ON au.customer_id = c.customer_id;
+
+
