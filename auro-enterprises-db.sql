@@ -258,37 +258,6 @@ CREATE TABLE service_history (
         FOREIGN KEY (technician_id) REFERENCES technicians(technician_id)
 );
 
--- View for report generator
-CREATE VIEW booking_report_view AS
-	SELECT
-	    b.booking_code,
-	    c.customer_fname || ' ' || c.customer_lname
-	    AS customer_name,
-	    s.service_name,
-	    t.technician_fname || ' ' || t.technician_lname
-	    AS technician_name,
-	    b.booking_date,
-	    b.status
-	FROM bookings b
-	JOIN customers c
-	ON b.customer_id = c.customer_id
-	JOIN services s
-	ON b.service_id = s.service_id
-	LEFT JOIN technicians t
-	ON b.technician_id = t.technician_id;
-
--- Indexing for booking date
-CREATE INDEX idx_bookings_booking_date
-ON bookings(booking_date);
-
-CREATE INDEX idx_bookings_customer_id
-ON bookings(customer_id);
-
-CREATE INDEX idx_bookings_service_id
-ON bookings(service_id);
-
-CREATE INDEX idx_bookings_technician_id
-ON bookings(technician_id);
 
 -- FUNCTION FOR DOUBLE BOOKING
 CREATE OR REPLACE FUNCTION prevent_double_booking()
@@ -386,6 +355,131 @@ $$ LANGUAGE plpgsql;
 
 SELECT total_revenue();
 
+/*For Dashboard Analytics*/
+-- 1. Total Revenue
+CREATE OR REPLACE FUNCTION total_revenue()
+RETURNS DECIMAL(10,2) AS $$
+DECLARE
+    revenue DECIMAL(10,2);
+BEGIN
+    SELECT COALESCE(SUM(amount), 0)
+    INTO revenue
+    FROM payments
+    WHERE status = 'Paid';
+
+    RETURN revenue;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2. Total Bookings
+CREATE OR REPLACE FUNCTION total_bookings()
+RETURNS INT AS $$
+DECLARE
+    total INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO total
+    FROM bookings;
+
+    RETURN total;
+END;
+$$ LANGUAGE plpgsql;
+
+--Total Customers
+CREATE OR REPLACE FUNCTION total_customers()
+RETURNS INT AS $$
+DECLARE
+    total INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO total
+    FROM customers;
+
+    RETURN total;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 4. Completed Services
+CREATE OR REPLACE FUNCTION completed_services()
+RETURNS INT AS $$
+DECLARE
+    total INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO total
+    FROM bookings
+    WHERE status = 'Completed';
+
+    RETURN total;
+END;
+$$ LANGUAGE plpgsql;
+
+-- How to call them
+SELECT total_revenue();
+SELECT total_bookings();
+SELECT total_customers();
+SELECT completed_services();
+
+/*Report Generator Program*/
+-- Booking Report
+CREATE VIEW booking_report_view AS
+	SELECT
+	    b.booking_code,
+	    c.customer_fname || ' ' || c.customer_lname
+	    AS customer_name,
+	    s.service_name,
+	    t.technician_fname || ' ' || t.technician_lname
+	    AS technician_name,
+	    b.booking_date,
+	    b.status
+	FROM bookings b
+	JOIN customers c
+	ON b.customer_id = c.customer_id
+	JOIN services s
+	ON b.service_id = s.service_id
+	LEFT JOIN technicians t
+	ON b.technician_id = t.technician_id;
+
+-- Indexing for Booking Report
+CREATE INDEX idx_bookings_booking_date
+ON bookings(booking_date);
+
+CREATE INDEX idx_bookings_customer_id
+ON bookings(customer_id);
+
+CREATE INDEX idx_bookings_service_id
+ON bookings(service_id);
+
+CREATE INDEX idx_bookings_technician_id
+ON bookings(technician_id);
+
+-- Service History Report
+CREATE OR REPLACE VIEW service_history_report_view AS
+SELECT
+    sh.history_code,
+    c.customer_fname || ' ' || c.customer_lname AS customer_name,
+    s.service_name,
+    t.technician_fname || ' ' || t.technician_lname AS technician_name,
+    sh.service_date,
+    sh.remarks
+FROM service_history sh
+JOIN customers c ON sh.customer_id = c.customer_id
+LEFT JOIN services s ON sh.service_id = s.service_id
+LEFT JOIN technicians t ON sh.technician_id = t.technician_id;
+
+-- Payment Report
+CREATE OR REPLACE VIEW payment_report_view AS
+SELECT
+    p.payment_code,
+    b.booking_code,
+    c.customer_fname || ' ' || c.customer_lname AS customer_name,
+    p.amount,
+    p.payment_method,
+    p.status,
+    p.payment_date
+FROM payments p
+JOIN bookings b ON p.booking_id = b.booking_id
+JOIN customers c ON b.customer_id = c.customer_id;
 
 
 
