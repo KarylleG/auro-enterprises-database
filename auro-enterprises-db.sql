@@ -453,35 +453,18 @@ ON bookings(service_id);
 CREATE INDEX idx_bookings_technician_id
 ON bookings(technician_id);
 
--- Service History Report
-CREATE OR REPLACE VIEW service_history_report_view AS
-SELECT
-    sh.history_code,
-    c.customer_fname || ' ' || c.customer_lname AS customer_name,
-    s.service_name,
-    t.technician_fname || ' ' || t.technician_lname AS technician_name,
-    sh.service_date,
-    sh.remarks
-FROM service_history sh
-JOIN customers c ON sh.customer_id = c.customer_id
-LEFT JOIN services s ON sh.service_id = s.service_id
-LEFT JOIN technicians t ON sh.technician_id = t.technician_id;
-
--- Payment Report
-CREATE OR REPLACE VIEW payment_report_view AS
+-- Payment Sales Report
+CREATE OR REPLACE VIEW sales_report_view AS
 SELECT
     p.payment_code,
     b.booking_code,
     c.customer_fname || ' ' || c.customer_lname AS customer_name,
     p.amount,
-    p.payment_method,
-    p.status,
     p.payment_date
 FROM payments p
 JOIN bookings b ON p.booking_id = b.booking_id
-JOIN customers c ON b.customer_id = c.customer_id;
-
-
+JOIN customers c ON b.customer_id = c.customer_id
+WHERE p.status = 'Paid';
 
 
 
