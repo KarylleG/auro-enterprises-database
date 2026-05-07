@@ -335,3 +335,37 @@ VALUES
 (119,119,119,119,'2026-05-19','PCB replaced'),
 (120,120,120,120,'2026-05-20','Relocation completed');
 
+-- VIEW FOR REPORT GENERATION
+CREATE VIEW booking_report_view AS
+SELECT
+    b.booking_code,
+    c.customer_fname || ' ' || c.customer_lname
+    AS customer_name,
+    s.service_name,
+    t.technician_fname || ' ' || t.technician_lname
+    AS technician_name,
+    b.booking_date,
+    b.status
+FROM bookings b
+
+JOIN customers c
+ON b.customer_id = c.customer_id
+
+JOIN services s
+ON b.service_id = s.service_id
+
+LEFT JOIN technicians t
+ON b.technician_id = t.technician_id;
+
+-- INDEXING FOR PERFORMANCE OPTIMIZATION
+CREATE INDEX idx_bookings_booking_date
+ON bookings(booking_date);
+
+CREATE INDEX idx_bookings_customer_id
+ON bookings(customer_id);
+
+CREATE INDEX idx_bookings_service_id
+ON bookings(service_id);
+
+CREATE INDEX idx_bookings_technician_id
+ON bookings(technician_id);
