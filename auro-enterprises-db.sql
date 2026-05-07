@@ -164,6 +164,8 @@ VALUES
 (119,'Hitachi','Premium Inverter 2HP','Split Type'),
 (120,'Condura','Energy Saver 1.5HP','Split Type');
 
+select *
+
 -- BOOKINGS
 CREATE TABLE bookings (
     booking_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY
@@ -199,34 +201,6 @@ CREATE TABLE bookings (
         FOREIGN KEY (technician_id) REFERENCES technicians(technician_id)
 );
 
-INSERT INTO bookings (
-customer_id, service_id, technician_id,
-booking_date,
-service_house_number, service_barangay, service_city, service_province,
-status
-)
-VALUES
-(101,101,101,'2026-05-01','blk 12 lot 7','Bagong Karsada','Naic','Cavite','Completed'),
-(102,102,102,'2026-05-02','84','Habay II','Bacoor','Cavite','Completed'),
-(103,103,103,'2026-05-03','938','Anabu I-A','Imus','Cavite','In Progress'),
-(104,104,104,'2026-05-04','blk 18 lot 4','Bucandala','Imus','Cavite','Pending'),
-(105,105,105,'2026-05-05','blk 4 lot 20','Panapaan','Bacoor','Cavite','Completed'),
-(106,106,106,'2026-05-06','821','Sabang','Kawit','Cavite','Cancelled'),
-(107,107,107,'2026-05-07','971','Salawag','Dasmariñas','Cavite','Completed'),
-(108,108,108,'2026-05-08','blk 7 lot 8','Ermita','Manila','Manila','Pending'),
-(109,109,109,'2026-05-09','blk 9 lot 3','Sampaloc','Manila','Manila','Completed'),
-(110,110,110,'2026-05-10','blk 5 lot 12','Moonwalk','Parañaque','Metro Manila','Completed'),
-(111,111,111,'2026-05-11','blk 9 lot 2','Don Bosco','Parañaque','Metro Manila','Completed'),
-(112,112,112,'2026-05-12','42','Salinas','Bacoor','Cavite','Pending'),
-(113,113,113,'2026-05-13','blk 3 lot 7','Bucandala','Imus','Cavite','Completed'),
-(114,114,114,'2026-05-14','333','Manggahan','General Trias','Cavite','In Progress'),
-(115,115,115,'2026-05-15','120','Talaba II','Bacoor','Cavite','Completed'),
-(116,116,116,'2026-05-16','88','San Agustin','Dasmariñas','Cavite','Pending'),
-(117,117,117,'2026-05-17','55','Navarro','General Trias','Cavite','Completed'),
-(118,118,118,'2026-05-18','77','San Antonio','Makati','Metro Manila','Completed'),
-(119,119,119,'2026-05-19','66','Poblacion','Makati','Metro Manila','Pending'),
-(120,120,120,'2026-05-20','101','Fort Bonifacio','Taguig','Metro Manila','Completed');
-
 -- PAYMENTS
 CREATE TABLE payments (
     payment_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY
@@ -251,31 +225,6 @@ CREATE TABLE payments (
         REFERENCES bookings(booking_id)
         ON DELETE CASCADE
 );
-
-INSERT INTO payments (
-booking_id, amount, payment_date, payment_method, status
-)
-VALUES
-(101,800,'2026-05-01','CASH','Paid'),
-(102,1200,'2026-05-02','GCASH','Paid'),
-(103,1500,'2026-05-03','MAYA','Unpaid'),
-(104,1000,'2026-05-04','CASH','Unpaid'),
-(105,1200,'2026-05-05','GCASH','Paid'),
-(106,800,'2026-05-06','CASH','Refunded'),
-(107,900,'2026-05-07','MAYA','Paid'),
-(108,1100,'2026-05-08','DEBIT CARD','Unpaid'),
-(109,1400,'2026-05-09','CASH','Paid'),
-(110,600,'2026-05-10','GCASH','Paid'),
-(111,1800,'2026-05-11','DEBIT CARD','Paid'),
-(112,500,'2026-05-12','CASH','Unpaid'),
-(113,900,'2026-05-13','GCASH','Paid'),
-(114,2500,'2026-05-14','MAYA','Unpaid'),
-(115,3500,'2026-05-15','CASH','Paid'),
-(116,950,'2026-05-16','DEBIT CARD','Unpaid'),
-(117,700,'2026-05-17','GCASH','Paid'),
-(118,400,'2026-05-18','CASH','Paid'),
-(119,3000,'2026-05-19','MAYA','Unpaid'),
-(120,2200,'2026-05-20','DEBIT CARD','Paid');
 
 -- SERVICE HISTORY
 CREATE TABLE service_history (
@@ -309,55 +258,26 @@ CREATE TABLE service_history (
         FOREIGN KEY (technician_id) REFERENCES technicians(technician_id)
 );
 
-INSERT INTO service_history (
-customer_id, booking_id, service_id, technician_id,
-service_date, remarks
-)
-VALUES
-(101,101,101,101,'2026-05-01','Aircon cleaned and tested'),
-(102,102,102,102,'2026-05-02','Repair successful'),
-(103,103,103,103,'2026-05-03','Installation ongoing'),
-(104,104,104,104,'2026-05-04','Waiting for parts'),
-(105,105,105,105,'2026-05-05','Maintenance completed'),
-(106,106,106,106,'2026-05-06','Cancelled by client'),
-(107,107,107,107,'2026-05-07','Freon refill done'),
-(108,108,108,108,'2026-05-08','Inspection scheduled'),
-(109,109,109,109,'2026-05-09','Cooling restored'),
-(110,110,110,110,'2026-05-10','Drain cleaned'),
-(111,111,111,111,'2026-05-11','Electrical issue fixed'),
-(112,112,112,112,'2026-05-12','Inspection done'),
-(113,113,113,113,'2026-05-13','Deep cleaning complete'),
-(114,114,114,114,'2026-05-14','Still in progress'),
-(115,115,115,115,'2026-05-15','Unit replaced'),
-(116,116,116,116,'2026-05-16','Awaiting approval'),
-(117,117,117,117,'2026-05-17','Gas leak fixed'),
-(118,118,118,118,'2026-05-18','Remote replaced'),
-(119,119,119,119,'2026-05-19','PCB replaced'),
-(120,120,120,120,'2026-05-20','Relocation completed');
-
--- VIEW FOR REPORT GENERATION
+-- View for report generator
 CREATE VIEW booking_report_view AS
-SELECT
-    b.booking_code,
-    c.customer_fname || ' ' || c.customer_lname
-    AS customer_name,
-    s.service_name,
-    t.technician_fname || ' ' || t.technician_lname
-    AS technician_name,
-    b.booking_date,
-    b.status
-FROM bookings b
+	SELECT
+	    b.booking_code,
+	    c.customer_fname || ' ' || c.customer_lname
+	    AS customer_name,
+	    s.service_name,
+	    t.technician_fname || ' ' || t.technician_lname
+	    AS technician_name,
+	    b.booking_date,
+	    b.status
+	FROM bookings b
+	JOIN customers c
+	ON b.customer_id = c.customer_id
+	JOIN services s
+	ON b.service_id = s.service_id
+	LEFT JOIN technicians t
+	ON b.technician_id = t.technician_id;
 
-JOIN customers c
-ON b.customer_id = c.customer_id
-
-JOIN services s
-ON b.service_id = s.service_id
-
-LEFT JOIN technicians t
-ON b.technician_id = t.technician_id;
-
--- INDEXING FOR PERFORMANCE OPTIMIZATION
+-- Indexing for booking date
 CREATE INDEX idx_bookings_booking_date
 ON bookings(booking_date);
 
@@ -370,33 +290,31 @@ ON bookings(service_id);
 CREATE INDEX idx_bookings_technician_id
 ON bookings(technician_id);
 
--- TRIGGER PREVENT DOUBLE BOOKING 
-
-CREATE TRIGGER trg_prevent_double_booking
-BEFORE INSERT ON bookings
-FOR EACH ROW
-WHEN (
-    EXISTS (
+-- FUNCTION FOR DOUBLE BOOKING
+CREATE OR REPLACE FUNCTION prevent_double_booking()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
         SELECT 1
         FROM bookings
         WHERE technician_id = NEW.technician_id
-        AND booking_date = NEW.booking_date
-        AND status <> 'Cancelled'
-    )
-)
-EXECUTE FUNCTION raise_exception();
- 
--- FUNCTIONS TECHNICIANS DOUBLE SCHEDULING
+          AND booking_date = NEW.booking_date
+          AND status <> 'Cancelled'
+    ) THEN
+        RAISE EXCEPTION 'Technician already booked on this date';
+    END IF;
 
-CREATE OR REPLACE FUNCTION raise_exception()
-RETURNS TRIGGER AS $$
-BEGIN
-    RAISE EXCEPTION 'Technician already booked on this date';
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- PROCEDURE ADD BOOKINGS 
+-- TRIGGER FOR DOUBLE BOOKING
+CREATE TRIGGER trg_prevent_double_booking
+BEFORE INSERT ON bookings
+FOR EACH ROW
+EXECUTE FUNCTION prevent_double_booking();
 
+-- PROCEDURE ADD BOOKINGS 
 CREATE OR REPLACE PROCEDURE add_booking(
     p_customer_id INT,
     p_service_id INT,
@@ -434,7 +352,6 @@ END;
 $$;
 
 -- view service history 
-
 CREATE VIEW service_history_report_view AS
 SELECT
     sh.history_code,
@@ -452,7 +369,24 @@ LEFT JOIN services s
 LEFT JOIN technicians t
     ON sh.technician_id = t.technician_id;
 
--- VIEW PAID PAYMENTS
+-- Total Revenue From Paid Payments
+CREATE OR REPLACE FUNCTION total_revenue()
+RETURNS DECIMAL(10,2) AS $$
+DECLARE
+    revenue DECIMAL(10,2);
+BEGIN
+    SELECT COALESCE(SUM(amount),0)
+    INTO revenue
+    FROM payments
+    WHERE status = 'Paid';
+
+    RETURN revenue;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT total_revenue();
+
+-- VIEW PAID PAYMENTS -- DID NOT INCLUDE
 CREATE VIEW paid_payments_view AS
 SELECT
     p.payment_code,
@@ -465,8 +399,7 @@ JOIN bookings b
     ON p.booking_id = b.booking_id
 WHERE p.status = 'Paid';
 
--- VIEW UNPAID PAYMENTS
-
+-- VIEW UNPAID PAYMENTS -- DID NOT INCLUDE
 CREATE VIEW unpaid_payments_view AS
 SELECT
     p.payment_code,
@@ -481,8 +414,7 @@ JOIN customers c
     ON b.customer_id = c.customer_id
 WHERE p.status = 'Unpaid';
 
--- VIEW PAYMENT HISTORY
-
+-- VIEW PAYMENT HISTORY-- -- DID NOT INCLUDE
 CREATE VIEW customer_payment_history_view AS
 SELECT
     c.customer_fname || ' ' || c.customer_lname AS customer_name,
@@ -498,7 +430,7 @@ JOIN bookings b
 JOIN customers c
     ON b.customer_id = c.customer_id;
 
--- CREATE VIEW customer_aircon_units_view AS
+-- CREATE VIEW customer_aircon_units_view AS -- DID NOT INCLUDE
 SELECT
     c.customer_fname || ' ' || c.customer_lname AS customer_name,
     au.unit_code,
@@ -508,5 +440,6 @@ SELECT
 FROM aircon_units au
 JOIN customers c
     ON au.customer_id = c.customer_id;
+
 
 
