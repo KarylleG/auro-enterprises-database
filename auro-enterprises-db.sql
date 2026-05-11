@@ -1,9 +1,8 @@
 CREATE TABLE customers (
-    customer_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 101 INCREMENT BY 1),
-
+    customer_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY 
+		(START WITH 101 INCREMENT BY 1),
     customer_code VARCHAR(10) GENERATED ALWAYS AS 
         ('CUST' || LPAD(customer_id::TEXT, 3, '0')) STORED,
-
     customer_fname VARCHAR(30) NOT NULL,
     customer_lname VARCHAR(30) NOT NULL,
     contact_number VARCHAR(11) NOT NULL UNIQUE,
@@ -13,47 +12,43 @@ CREATE TABLE customers (
     barangay VARCHAR(50) NOT NULL,
     city VARCHAR(50) NOT NULL,
     province VARCHAR(50) NOT NULL,
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
+
 CREATE TABLE bookings (
-    booking_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 101 INCREMENT BY 1),
+    booking_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY 
+		(START WITH 101 INCREMENT BY 1),
 
     booking_code VARCHAR(10) GENERATED ALWAYS AS 
         ('B' || LPAD(booking_id::TEXT, 3, '0')) STORED,
-
     customer_id INT NOT NULL,
     service_id INT NOT NULL,
-
     booking_date DATE NOT NULL,
-
     service_house_number VARCHAR(50) NOT NULL,
     service_barangay VARCHAR(50) NOT NULL,
     service_city VARCHAR(50) NOT NULL,
     service_province VARCHAR(50) NOT NULL,
-
     status VARCHAR(20) NOT NULL DEFAULT 'Pending'
         CHECK (status IN ('Pending', 'In Progress', 'Completed', 'Cancelled')),
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (customer_id)
         REFERENCES customers(customer_id),
-
     FOREIGN KEY (service_id)
         REFERENCES services(service_id)
 );
 
 CREATE TABLE aircon_units (
-    unit_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 101 INCREMENT BY 1),
-
+    unit_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY 
+		(START WITH 101 INCREMENT BY 1),
+    unit_code VARCHAR(10) GENERATED ALWAYS AS 
+        ('AU' || LPAD(unit_id::TEXT, 3, '0')) STORED,
     booking_id INT NOT NULL,
-
     brand VARCHAR(50) NOT NULL,
     model VARCHAR(50) NOT NULL,
     unit_type VARCHAR(50) NOT NULL,
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (booking_id)
@@ -63,52 +58,54 @@ CREATE TABLE aircon_units (
 
 /*Data is fixed*/
 CREATE TABLE services (
-    service_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 101 INCREMENT BY 1),
-
+    service_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY 
+		(START WITH 101 INCREMENT BY 1),
     service_code VARCHAR(10) GENERATED ALWAYS AS 
         ('SV' || LPAD(service_id::TEXT, 3, '0')) STORED,
-
     service_name VARCHAR(50) NOT NULL UNIQUE,
     price DECIMAL(10,2) NOT NULL CHECK (price > 0)
 );
 
 /*Data is fixed*/
 CREATE TABLE technicians (
-    technician_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-
+    technician_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY
+		(START WITH 101 INCREMENT BY 1),
+    technician_code VARCHAR(10) GENERATED ALWAYS AS 
+        ('TECH' || LPAD(technician_id::TEXT, 3, '0')) STORED,
     technician_fname VARCHAR(30) NOT NULL,
     technician_lname VARCHAR(30) NOT NULL,
     contact_number VARCHAR(11),
     specialization VARCHAR(50)
 );
 
-CREATE TABLE booking_technicians (
-    assignment_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
+
+CREATE TABLE booking_technicians (
+    assignment_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY
+		(START WITH 101 INCREMENT BY 1),
+    assignment_code VARCHAR(10) GENERATED ALWAYS AS 
+        ('B' || LPAD(assignment_id::TEXT, 3, '0')) STORED,
     booking_id INT NOT NULL,
     technician_id INT NOT NULL,
-
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (booking_id)
         REFERENCES bookings(booking_id)
         ON DELETE CASCADE,
-
     FOREIGN KEY (technician_id)
         REFERENCES technicians(technician_id)
 );
 
 CREATE TABLE payments (
-    payment_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-
+    payment_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY
+		(START WITH 101 INCREMENT BY 1),
+    payment_code VARCHAR(10) GENERATED ALWAYS AS 
+        ('PAY' || LPAD(payment_id::TEXT, 3, '0')) STORED,
     booking_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
-
     payment_method VARCHAR(20)
         CHECK (payment_method IN ('GCASH', 'CASH', 'MAYA', 'DEBIT CARD')),
-
     status VARCHAR(20) DEFAULT 'Paid',
-
     payment_date DATE DEFAULT CURRENT_DATE,
 
     FOREIGN KEY (booking_id)
@@ -117,13 +114,14 @@ CREATE TABLE payments (
 );
 
 CREATE TABLE service_history (
-    history_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-
+    history_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY
+		(START WITH 101 INCREMENT BY 1),
+    history_code VARCHAR(10) GENERATED ALWAYS AS 
+        ('H' || LPAD(history_id::TEXT, 3, '0')) STORED,
     booking_id INT NOT NULL,
     customer_id INT NOT NULL,
     service_id INT NOT NULL,
     technician_id INT,
-
     service_date DATE NOT NULL,
     remarks TEXT,
 
@@ -276,10 +274,12 @@ VALUES
 
 INSERT INTO booking_technicians (booking_id, technician_id)
 VALUES
-(101,1),(102,2),(103,3),(104,4),(105,5),
-(106,6),(107,7),(108,8),(109,9),(110,10),
-(111,1),(112,2),(113,3),(114,4),(115,5),
-(116,6),(117,7),(118,8),(119,9),(120,10);
+(101,101),(102,102),(103,103),(104,104),(105,105),
+(106,106),(107,107),(108,108),(109,109),(110,110),
+(111,101),(112,102),(113,103),(114,104),(115,105),
+(116,106),(117,107),(118,108),(119,109),(120,110);
+
+select * from technicians
 
 INSERT INTO payments (booking_id, amount, payment_method, status)
 VALUES
@@ -309,15 +309,16 @@ booking_id, customer_id, service_id, technician_id,
 service_date, remarks
 )
 VALUES
-(101,101,101,1,'2026-05-01','Completed cleaning'),
-(102,102,102,2,'2026-05-02','Repair done'),
-(105,105,105,5,'2026-05-05','Installation completed'),
-(106,106,101,6,'2026-05-06','Cleaning done'),
-(108,108,103,8,'2026-05-08','Installed properly'),
-(110,110,105,10,'2026-05-10','Maintenance done'),
-(111,111,101,1,'2026-05-11','Service completed'),
-(113,113,103,3,'2026-05-13','Repair successful'),
-(115,115,105,5,'2026-05-15','Unit cleaned'),
-(116,116,101,6,'2026-05-16','Checked and completed'),
-(118,118,103,8,'2026-05-18','Freon refilled'),
-(120,120,105,10,'2026-05-20','System checked');
+(101,101,101,101,'2026-05-01','Completed cleaning'),
+(102,102,102,105,'2026-05-02','Repair done'),
+(105,105,105,101,'2026-05-05','Installation completed'),
+(106,106,101,106,'2026-05-06','Cleaning done'),
+(108,108,103,108,'2026-05-08','Installed properly'),
+(110,110,105,101,'2026-05-10','Maintenance done'),
+(111,111,101,101,'2026-05-11','Service completed'),
+(113,113,103,103,'2026-05-13','Repair successful'),
+(115,115,105,105,'2026-05-15','Unit cleaned'),
+(116,116,101,106,'2026-05-16','Checked and completed'),
+(118,118,103,108,'2026-05-18','Freon refilled'),
+(120,120,105,110,'2026-05-20','System checked');
+
