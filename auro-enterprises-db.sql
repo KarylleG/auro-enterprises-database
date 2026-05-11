@@ -355,7 +355,7 @@ Payment Date
                      BOOKINGS REPORT 
    ========================================================= */
 
-CREATE OR REPLACE VIEW vw_bookings_report AS
+CREATE OR REPLACE VIEW bookings_report AS
 SELECT
     b.booking_code,
     c.customer_fname || ' ' || c.customer_lname AS customer_name,
@@ -386,8 +386,6 @@ Service Location (City, Province only)
 Technician Name
 Booking Status
 */
-
-
 
 
 /* =========================================================
