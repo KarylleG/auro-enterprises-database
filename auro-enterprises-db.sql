@@ -61,6 +61,7 @@ CREATE TABLE aircon_units (
         ON DELETE CASCADE
 );
 
+/*Data is fixed*/
 CREATE TABLE services (
     service_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 101 INCREMENT BY 1),
 
@@ -71,6 +72,7 @@ CREATE TABLE services (
     price DECIMAL(10,2) NOT NULL CHECK (price > 0)
 );
 
+/*Data is fixed*/
 CREATE TABLE technicians (
     technician_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
@@ -130,3 +132,44 @@ CREATE TABLE service_history (
     FOREIGN KEY (service_id) REFERENCES services(service_id),
     FOREIGN KEY (technician_id) REFERENCES technicians(technician_id)
 );
+
+/* Trigger function to archive completed bookings into service_history */
+CREATE OR REPLACE FUNCTION archive_completed_booking()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+    -- Only run when status changes TO Completed
+    IF NEW.status = 'Completed' AND OLD.status <> 'Completed' THEN
+
+        INSERT INTO service_history (
+            booking_id,
+            customer_id,
+            service_id,
+            technician_id,
+            service_date,
+            remarks
+        )
+        SELECT
+            NEW.booking_id,
+            NEW.customer_id,
+            NEW.service_id,
+            bt.technician_id,
+            CURRENT_DATE,
+            'Auto recorded after completion'
+        FROM booking_technicians bt
+        WHERE bt.booking_id = NEW.booking_id
+        LIMIT 1;
+
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_booking_completed
+AFTER UPDATE OF status ON bookings
+FOR EACH ROW
+WHEN (NEW.status = 'Completed')
+EXECUTE FUNCTION archive_completed_booking();
