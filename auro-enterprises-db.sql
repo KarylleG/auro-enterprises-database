@@ -316,3 +316,69 @@ VALUES
 (116,116,116,101,16,'2026-05-16','Checked'),
 (117,117,117,102,17,'2026-05-17','Minor issue fixed'),
 (119,119,119,104,19,'2026-05-19','Inspection done');
+
+--Total Revenue Function
+CREATE OR REPLACE FUNCTION total_revenue()
+RETURNS DECIMAL(10,2)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    revenue DECIMAL(10,2);
+BEGIN
+    SELECT COALESCE(SUM(amount), 0)
+    INTO revenue
+    FROM payments
+    WHERE status = 'Paid';
+
+    RETURN revenue;
+END;
+$$;
+
+--Total Bookings Function
+CREATE OR REPLACE FUNCTION total_bookings()
+RETURNS INT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    total INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO total
+    FROM bookings;
+
+    RETURN total;
+END;
+$$;
+
+-- Total Customers Function
+CREATE OR REPLACE FUNCTION total_customers()
+RETURNS INT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    total INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO total
+    FROM customers;
+
+    RETURN total;
+END;
+$$;
+
+-- Completed Services Function
+CREATE OR REPLACE FUNCTION completed_services()
+RETURNS INT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    total INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO total
+    FROM bookings
+    WHERE status = 'Completed';
+
+    RETURN total;
+END;
+$$;
