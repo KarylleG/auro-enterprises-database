@@ -173,3 +173,151 @@ AFTER UPDATE OF status ON bookings
 FOR EACH ROW
 WHEN (NEW.status = 'Completed')
 EXECUTE FUNCTION archive_completed_booking();
+
+INSERT INTO customers (
+customer_fname, customer_lname, contact_number, customer_email,
+address_house_number, barangay, city, province
+)
+VALUES
+('Nico','Nunez','09170000001','nico1@gmail.com','12A','Bucandala','Imus','Cavite'),
+('Nicole','Pizarro','09170000002','nicole@gmail.com','45B','Anabu','Imus','Cavite'),
+('Nilo','Perez','09170000003','nilo@gmail.com','78C','Bayanan','Dasma','Cavite'),
+('James','Vea','09170000004','james@gmail.com','11D','Salawag','Dasma','Cavite'),
+('AJ','Mayormente','09170000005','aj@gmail.com','22E','Habay','Bacoor','Cavite'),
+('Bong','Sigayan','09170000006','bong@gmail.com','33F','Mambog','Bacoor','Cavite'),
+('Jasper','Durana','09170000007','jasper@gmail.com','44G','Talon','Las Pinas','Metro Manila'),
+('Vic','Ventura','09170000008','vic@gmail.com','55H','Moonwalk','Paranaque','Metro Manila'),
+('Renyl','Dionson','09170000009','renyl@gmail.com','66I','BF Homes','Paranaque','Metro Manila'),
+('Philip','Villegas','09170000010','philip@gmail.com','77J','Don Bosco','Paranaque','Metro Manila'),
+('Yshin','Jimenez','09170000011','yshin@gmail.com','88K','Zapote','Bacoor','Cavite'),
+('Harell','Diaz','09170000012','harell@gmail.com','99L','Talaba','Bacoor','Cavite'),
+('Andrei','Magpali','09170000013','andrei@gmail.com','101M','Manggahan','Gen Trias','Cavite'),
+('Carlo','Reyes','09170000014','carlo@gmail.com','202N','Pasong Kawayan','Gen Trias','Cavite'),
+('Mark','Santos','09170000015','mark@gmail.com','303O','Langkaan','Dasma','Cavite'),
+('Paolo','Cruz','09170000016','paolo@gmail.com','404P','San Agustin','Dasma','Cavite'),
+('Kevin','Lopez','09170000017','kevin@gmail.com','505Q','Poblacion','Makati','Metro Manila'),
+('Ryan','Garcia','09170000018','ryan@gmail.com','606R','Guadalupe','Makati','Metro Manila'),
+('Leo','Torres','09170000019','leo@gmail.com','707S','Fort Bonifacio','Taguig','Metro Manila'),
+('Ian','Morales','09170000020','ian@gmail.com','808T','Ususan','Taguig','Metro Manila');
+
+INSERT INTO services (service_name, price)
+VALUES
+('Aircon Cleaning', 800.00),
+('Aircon Repair', 1200.00),
+('Aircon Installation', 2500.00),
+('Freon Refill', 1500.00),
+('General Maintenance', 1000.00);
+
+INSERT INTO technicians (
+technician_fname, technician_lname, contact_number, specialization
+)
+VALUES
+('Mark','Dela Cruz','09170000001','Cleaning'),
+('John','Reyes','09170000002','Repair'),
+('Luis','Torres','09170000003','Installation'),
+('Paolo','Santos','09170000004','Electrical'),
+('Ramon','Garcia','09170000005','Freon'),
+('Jomar','Lopez','09170000006','General'),
+('Erwin','Cruz','09170000007','Repair'),
+('Neil','Rivera','09170000008','Installation'),
+('Bryan','Mendoza','09170000009','Cleaning'),
+('Carlo','Navarro','09170000010','Maintenance');
+
+INSERT INTO bookings (
+customer_id, service_id,
+booking_date,
+service_house_number, service_barangay, service_city, service_province,
+status
+)
+VALUES
+(101,101,'2026-05-01','12A','Bucandala','Imus','Cavite','Completed'),
+(102,102,'2026-05-02','45B','Anabu','Imus','Cavite','Completed'),
+(103,103,'2026-05-03','78C','Bayanan','Dasma','Cavite','In Progress'),
+(104,104,'2026-05-04','11D','Salawag','Dasma','Cavite','Pending'),
+(105,105,'2026-05-05','22E','Habay','Bacoor','Cavite','Completed'),
+(106,101,'2026-05-06','33F','Mambog','Bacoor','Cavite','Completed'),
+(107,102,'2026-05-07','44G','Talon','Las Pinas','Metro Manila','Pending'),
+(108,103,'2026-05-08','55H','Moonwalk','Paranaque','Metro Manila','Completed'),
+(109,104,'2026-05-09','66I','BF Homes','Paranaque','Metro Manila','Pending'),
+(110,105,'2026-05-10','77J','Don Bosco','Paranaque','Metro Manila','Completed'),
+(111,101,'2026-05-11','88K','Zapote','Bacoor','Cavite','Completed'),
+(112,102,'2026-05-12','99L','Talaba','Bacoor','Cavite','In Progress'),
+(113,103,'2026-05-13','101M','Manggahan','Gen Trias','Cavite','Completed'),
+(114,104,'2026-05-14','202N','Pasong Kawayan','Gen Trias','Cavite','Pending'),
+(115,105,'2026-05-15','303O','Langkaan','Dasma','Cavite','Completed'),
+(116,101,'2026-05-16','404P','San Agustin','Dasma','Cavite','Completed'),
+(117,102,'2026-05-17','505Q','Poblacion','Makati','Metro Manila','Pending'),
+(118,103,'2026-05-18','606R','Guadalupe','Makati','Metro Manila','Completed'),
+(119,104,'2026-05-19','707S','Fort Bonifacio','Taguig','Metro Manila','Pending'),
+(120,105,'2026-05-20','808T','Ususan','Taguig','Metro Manila','Completed');
+
+INSERT INTO aircon_units (booking_id, brand, model, unit_type)
+VALUES
+(101,'LG','DualCool','Split'),
+(102,'Samsung','WindFree','Split'),
+(103,'Carrier','Optima','Window'),
+(104,'Panasonic','Econavi','Split'),
+(105,'Daikin','Inverter','Split'),
+(106,'Kolin','KAG','Window'),
+(107,'TCL','Elite','Split'),
+(108,'Sharp','Plasmacluster','Window'),
+(109,'Hitachi','RAS','Split'),
+(110,'Condura','Basic','Window'),
+(111,'LG','Smart Inverter','Split'),
+(112,'Samsung','AR Series','Window'),
+(113,'Carrier','Inverter','Split'),
+(114,'Panasonic','Sky Series','Window'),
+(115,'Daikin','Premium','Split'),
+(116,'Kolin','Standard','Split'),
+(117,'TCL','CoolPro','Window'),
+(118,'Sharp','Eco','Window'),
+(119,'Hitachi','Premium','Split'),
+(120,'Condura','Energy Saver','Split');
+
+INSERT INTO booking_technicians (booking_id, technician_id)
+VALUES
+(101,1),(102,2),(103,3),(104,4),(105,5),
+(106,6),(107,7),(108,8),(109,9),(110,10),
+(111,1),(112,2),(113,3),(114,4),(115,5),
+(116,6),(117,7),(118,8),(119,9),(120,10);
+
+INSERT INTO payments (booking_id, amount, payment_method, status)
+VALUES
+(101,800,'GCASH','Paid'),
+(102,1200,'CASH','Paid'),
+(103,2500,'MAYA','Paid'),
+(104,1500,'GCASH','Paid'),
+(105,1000,'DEBIT CARD','Paid'),
+(106,800,'CASH','Paid'),
+(107,1200,'GCASH','Paid'),
+(108,2500,'MAYA','Paid'),
+(109,1500,'CASH','Paid'),
+(110,1000,'GCASH','Paid'),
+(111,800,'DEBIT CARD','Paid'),
+(112,1200,'CASH','Paid'),
+(113,2500,'GCASH','Paid'),
+(114,1500,'MAYA','Paid'),
+(115,1000,'CASH','Paid'),
+(116,800,'GCASH','Paid'),
+(117,1200,'DEBIT CARD','Paid'),
+(118,2500,'MAYA','Paid'),
+(119,1500,'CASH','Paid'),
+(120,1000,'GCASH','Paid');
+
+INSERT INTO service_history (
+booking_id, customer_id, service_id, technician_id,
+service_date, remarks
+)
+VALUES
+(101,101,101,1,'2026-05-01','Completed cleaning'),
+(102,102,102,2,'2026-05-02','Repair done'),
+(105,105,105,5,'2026-05-05','Installation completed'),
+(106,106,101,6,'2026-05-06','Cleaning done'),
+(108,108,103,8,'2026-05-08','Installed properly'),
+(110,110,105,10,'2026-05-10','Maintenance done'),
+(111,111,101,1,'2026-05-11','Service completed'),
+(113,113,103,3,'2026-05-13','Repair successful'),
+(115,115,105,5,'2026-05-15','Unit cleaned'),
+(116,116,101,6,'2026-05-16','Checked and completed'),
+(118,118,103,8,'2026-05-18','Freon refilled'),
+(120,120,105,10,'2026-05-20','System checked');
