@@ -424,3 +424,33 @@ FROM payments p
 JOIN bookings b ON p.booking_id = b.booking_id
 JOIN customers c ON b.customer_id = c.customer_id
 JOIN services s ON b.service_id = s.service_id;
+
+/* GUI FOR BOOKINGS REPORT
+--------------------------------------------------------------
+| Booking Code | Customer Name | Service | Aircon Unit      |
+--------------------------------------------------------------
+| B101         | Nico Nunez    | Cleaning | LG DualCool      |
+| B102         | James Vea     | Repair   | Samsung WindFree |
+--------------------------------------------------------------
+| Booking Date | Status       | Technician       | Location   |
+--------------------------------------------------------------
+| 2026-05-01   | Pending      | Not Assigned     | Imus       |
+| 2026-05-02   | Completed    | Mark Dela Cruz   | Dasma      |
+--------------------------------------------------------------
+
+GUI FOR SALES REPORT
+---------------------------------------------------------------------------
+| Payment ID | Booking Code | Customer Name | Service            |
+---------------------------------------------------------------------------
+| 1          | B101         | Nico Nunez    | Aircon Cleaning    |
+| 2          | B102         | James Vea     | Aircon Repair      |
+---------------------------------------------------------------------------
+| Amount     | Payment Method | Payment Status | Payment Date     |
+---------------------------------------------------------------------------
+| ₱800       | GCASH          | Paid           | 2026-05-01       |
+| ₱1200      | CASH           | Paid           | 2026-05-02       |
+---------------------------------------------------------------------------
+
+Total Sales: ₱25,000.00
+
+*/
