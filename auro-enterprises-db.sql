@@ -382,3 +382,45 @@ BEGIN
     RETURN total;
 END;
 $$;
+
+
+/*Report Generator*/
+CREATE OR REPLACE VIEW booking_report AS
+SELECT
+    b.booking_id,
+    b.booking_code,
+    c.customer_fname || ' ' || c.customer_lname AS customer_name,
+    s.service_name,
+    a.brand || ' ' || a.model AS aircon_unit,
+    b.booking_date,
+    b.status,
+    b.service_barangay,
+    b.service_city,
+
+    COALESCE(
+        t.technician_fname || ' ' || t.technician_lname,
+        'Not Assigned'
+    ) AS technician_name
+
+FROM bookings b
+JOIN customers c ON b.customer_id = c.customer_id
+JOIN services s ON b.service_id = s.service_id
+JOIN aircon_units a ON b.unit_id = a.unit_id
+LEFT JOIN booking_technicians bt ON b.booking_id = bt.booking_id
+LEFT JOIN technicians t ON bt.technician_id = t.technician_id;
+
+CREATE OR REPLACE VIEW sales_report AS
+SELECT
+    p.payment_id,
+    b.booking_code,
+    c.customer_fname || ' ' || c.customer_lname AS customer_name,
+    s.service_name,
+    p.amount,
+    p.payment_method,
+    p.status AS payment_status,
+    p.payment_date
+
+FROM payments p
+JOIN bookings b ON p.booking_id = b.booking_id
+JOIN customers c ON b.customer_id = c.customer_id
+JOIN services s ON b.service_id = s.service_id;
