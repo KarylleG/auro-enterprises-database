@@ -1,3 +1,24 @@
+CREATE TABLE admin_accounts (
+
+    admin_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY
+        (START WITH 101 INCREMENT BY 1),
+
+    admin_code VARCHAR(10) GENERATED ALWAYS AS
+        ('ADM' || LPAD(admin_id::TEXT, 3, '0')) STORED,
+
+    username VARCHAR(50) NOT NULL UNIQUE,
+
+    password VARCHAR(255) NOT NULL,
+
+    admin_fname VARCHAR(30) NOT NULL,
+
+    admin_lname VARCHAR(30) NOT NULL,
+
+    admin_email VARCHAR(50) UNIQUE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE customers (
     customer_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY 
 		(START WITH 101 INCREMENT BY 1),
@@ -169,6 +190,14 @@ AFTER UPDATE OF status ON bookings
 FOR EACH ROW
 WHEN (NEW.status = 'Completed')
 EXECUTE FUNCTION archive_completed_booking();
+
+INSERT INTO admin_accounts (username, password, admin_fname, admin_lname, admin_email)
+VALUES
+('admin_karylle', 'Karylle123', 'Karylle', 'Gimalalud', 'karylle@auro.com'),
+('admin_yshin', 'Yshin123', 'Yshin', 'Jimenez', 'yshin@auro.com'),
+('admin_riddick', 'Riddick123', 'Riddick', 'Guinto', 'riddick@auro.com'),
+('admin_nic', 'Nic123', 'Nic', 'Nunez', 'nic@auro.com'),
+('admin_georcy', 'Georcy123', 'Georcy', 'Erez', 'georcy@auro.com');
 
 INSERT INTO customers (
 customer_fname, customer_lname, contact_number, customer_email,
