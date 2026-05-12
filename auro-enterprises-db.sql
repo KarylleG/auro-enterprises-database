@@ -461,3 +461,160 @@ AS $$
     SELECT COUNT(*)
     FROM bookings;
 $$;
+
+/*TRIGGERS*/
+-- prevent double unit_ID and unit_Code
+
+CREATE OR REPLACE FUNCTION prevent_duplicate_aircon()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check duplicate unit_id
+    IF EXISTS (
+        SELECT 1
+        FROM aircon_units
+        WHERE unit_id = NEW.unit_id
+    ) THEN
+        RAISE EXCEPTION 'Duplicate unit_id is not allowed.';
+    END IF;
+
+    -- Check duplicate unit_code
+    IF EXISTS (
+        SELECT 1
+        FROM aircon_units
+        WHERE unit_code = NEW.unit_code
+    ) THEN
+        RAISE EXCEPTION 'Duplicate unit_code is not allowed.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_prevent_duplicate_aircon
+BEFORE INSERT OR UPDATE
+ON aircon_units
+FOR EACH ROW
+EXECUTE FUNCTION prevent_duplicate_aircon();
+
+
+-- double booking trigger
+CREATE OR REPLACE FUNCTION prevent_double_booking()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM bookings
+        WHERE service_id = NEW.service_id
+          AND booking_date = NEW.booking_date
+          AND status IN ('Pending', 'In Progress')
+    ) THEN
+        RAISE EXCEPTION 'Double booking detected: Service % is already booked on %',
+            NEW.service_id, NEW.booking_date;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_prevent_double_booking
+BEFORE INSERT ON bookings
+FOR EACH ROW
+EXECUTE FUNCTION prevent_double_booking();
+
+--same technician double booking
+
+CREATE OR REPLACE FUNCTION prevent_technician_double_booking()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM booking_technicians bt
+        JOIN bookings b_existing ON b_existing.booking_id = bt.booking_id
+        JOIN bookings b_new ON b_new.booking_id = NEW.booking_id
+        WHERE bt.technician_id = NEW.technician_id
+          AND b_existing.booking_date = b_new.booking_date
+          AND b_existing.status IN ('Pending', 'In Progress')
+    ) THEN
+        RAISE EXCEPTION 
+        'Technician % is already booked on %',
+        NEW.technician_id,
+        (SELECT booking_date FROM bookings WHERE booking_id = NEW.booking_id);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_prevent_technician_double_booking
+BEFORE INSERT ON booking_technicians
+FOR EACH ROW
+EXECUTE FUNCTION prevent_technician_double_booking();
+
+-- technician availability calendar
+
+SELECT 
+    d.calendar_date,
+    t.technician_id,
+    t.technician_name,
+    CASE 
+        WHEN EXISTS (
+            SELECT 1
+            FROM booking_technicians bt
+            JOIN bookings b ON b.booking_id = bt.booking_id
+            WHERE bt.technician_id = t.technician_id
+              AND b.booking_date = d.calendar_date
+              AND b.status IN ('Pending', 'In Progress')
+        )
+        THEN 'Busy'
+        ELSE 'Available'
+    END AS availability_status
+FROM technicians t
+CROSS JOIN (
+    SELECT DISTINCT booking_date AS calendar_date
+    FROM bookings
+    WHERE booking_date >= CURRENT_DATE
+) d
+ORDER BY d.calendar_date, t.technician_id;
+
+-- auto mark booking completed when payment is completed
+CREATE OR REPLACE FUNCTION complete_booking_after_payment()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE bookings
+    SET status = 'Completed'
+    WHERE booking_id = NEW.booking_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_complete_booking_after_payment
+AFTER UPDATE OF status ON payments
+FOR EACH ROW
+WHEN (NEW.status = 'Paid')
+EXECUTE FUNCTION complete_booking_after_payment();
+
+--Prevent Payment for Cancelled Bookings
+
+CREATE OR REPLACE FUNCTION block_payment_for_cancelled_booking()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM bookings
+        WHERE booking_id = NEW.booking_id
+          AND status = 'Cancelled'
+    ) THEN
+        RAISE EXCEPTION 
+        'Cannot process payment for cancelled booking %',
+        NEW.booking_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_block_cancelled_booking_payment
+BEFORE INSERT ON payments
+FOR EACH ROW
+EXECUTE FUNCTION block_payment_for_cancelled_booking();
